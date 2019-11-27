@@ -6,6 +6,13 @@ const helmet = require('helmet');
 const compression = require('compression')
 const cors = require('cors');
 
+const users = require('./routes/users');
+const diets = require('./routes/diets');
+const meals = require('./routes/meals');
+const ingredients = require('./routes/ingredients');
+const login = require('./routes/login');
+
+const error = require('./middleware/error');
 
 app.use(helmet());
 app.use(compression());
@@ -15,7 +22,11 @@ app.get('/api', (req, res) => {
   res.send(`See README for API use instructions: ${url}`);
 });
 app.use(express.json());
-
+app.use('/api/users', users);
+app.use('/api/diets', diets);
+app.use('/api/meals', meals);
+app.use('/api/ingredients', ingredients);
+app.use('/api/login', login);
 
 app.use(error);
 
