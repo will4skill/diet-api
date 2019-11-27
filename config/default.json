@@ -1,0 +1,8 @@
+{
+  "jwt_private_key": "",
+  "bcrypt_salt": "",
+  "db": "./db/development.sqlite",
+  "port": "3900",
+  "admin_middleware_on": true,
+  "auth_middleware_on": true
+}

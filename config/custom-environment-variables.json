@@ -1,0 +1,5 @@
+{
+  "jwt_private_key": "diet_api_jwt_private_key",
+  "bcrypt_salt": "diet_api_bcrypt_salt",
+  "db": "diet_api_db"
+}
