@@ -6,7 +6,7 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true,
       autoIncrement: true
     },
-    title: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
       len: [3, 30]
@@ -15,5 +15,17 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.TEXT,
       allowNull: false
     },
+    carbohydrates: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    fat: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    protein: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    }
   }, {});
 };

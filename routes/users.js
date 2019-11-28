@@ -22,7 +22,9 @@ router.post('/', async (req, res) => {
     const user = await User.create({
       username: req.body.username,
       email: req.body.email,
-      password_digest: password_digest
+      password_digest: password_digest,
+      calories: req.body.calories,
+      dietId: null,
     });
 
     res
@@ -32,7 +34,9 @@ router.post('/', async (req, res) => {
         {
           id: user.id,
           username: req.body.username,
-          email: req.body.email
+          email: req.body.email,
+          calories: req.body.calories,
+          dietId: null,
         });
   } catch (err) {
     res.status(400).send(err);
@@ -62,7 +66,9 @@ router.put('/me', auth, async (req, res) => {
       });
       const updated_user = await user.update({
         username: req.body.username,
-        email: req.body.email
+        email: req.body.email,
+        calories: req.body.calories,
+        dietId: null,
       });
       res.send(updated_user);
   } catch(err) {

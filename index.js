@@ -9,6 +9,7 @@ const cors = require('cors');
 const users = require('./routes/users');
 const diets = require('./routes/diets');
 const meals = require('./routes/meals');
+const meal_ingredients = require('./routes/meal_ingredients');
 const ingredients = require('./routes/ingredients');
 const login = require('./routes/login');
 
@@ -25,6 +26,7 @@ app.use(express.json());
 app.use('/api/users', users);
 app.use('/api/diets', diets);
 app.use('/api/meals', meals);
+  app.use('/api/meals', meal_ingredients); // Nested routes
 app.use('/api/ingredients', ingredients);
 app.use('/api/login', login);
 

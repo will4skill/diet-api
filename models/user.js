@@ -21,6 +21,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING,
       allowNull: false
     },
+    calories: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
     admin: {
       type: DataTypes.BOOLEAN,
       defaultValue: false
