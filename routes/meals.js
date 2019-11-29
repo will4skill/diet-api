@@ -19,9 +19,11 @@ router.post('/', auth, async (req, res) => {
   let meal_ingredients = [];
   try {
     let meal = await Meal.create({
+      userId: req.user.id,
       name: req.body.name,
       description: req.body.description,
     });
+
     for(let mi of req.body.meal_ingredients) {
       meal_ingredients.push({
         mealId: meal.id,

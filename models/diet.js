@@ -16,15 +16,15 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     },
     carbohydrates: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
       allowNull: false
     },
     fat: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
       allowNull: false
     },
     protein: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
       allowNull: false
     }
   }, {});

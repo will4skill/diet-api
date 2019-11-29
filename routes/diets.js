@@ -20,6 +20,8 @@ router.get('/:id', [auth, admin], async (req, res) => {
 router.post('/', [auth, admin], async (req, res) => {
   try {
     const diet = await Diet.create({
+      name: req.body.name,
+      description: req.body.description,
       calories: req.body.calories,
       protein: req.body.protein,
       fat: req.body.fat,
@@ -38,6 +40,8 @@ router.put('/:id', [auth, admin], async (req, res) => {
   }
   try {
     const updated_diet = await diet.update({
+      name: req.body.name,
+      description: req.body.description,
       calories: req.body.calories,
       protein: req.body.protein,
       fat: req.body.fat,

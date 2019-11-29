@@ -28,7 +28,8 @@ describe('/api/login', () => {
       user = User.build({
         username: 'bob',
         email: 'bob@example.com',
-        password_digest: digest
+        password_digest: digest,
+        calories: 2400
       });
       await user.save();
       token = createJWT(user);

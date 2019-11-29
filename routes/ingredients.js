@@ -21,8 +21,8 @@ router.post('/', [auth, admin], async (req, res) => {
   try {
     const ingredient = await Ingredient.create({
       name: req.body.name,
-      description: req.body.text,
-      servering_size: req.body.serving_size,
+      description: req.body.description,
+      serving_size: req.body.serving_size,
       calories: req.body.calories,
       protein: req.body.protein,
       fat: req.body.fat,
@@ -42,8 +42,8 @@ router.put('/:id', [auth, admin], async (req, res) => {
   try {
     const updated_ingredient = await ingredient.update({
       name: req.body.name,
-      description: req.body.text,
-      servering_size: req.body.serving_size,
+      description: req.body.description,
+      serving_size: req.body.serving_size,
       calories: req.body.calories,
       protein: req.body.protein,
       fat: req.body.fat,
