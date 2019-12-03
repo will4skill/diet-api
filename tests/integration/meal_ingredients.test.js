@@ -15,8 +15,108 @@ describe('/:mealId/meal-ingredients', () => {
     await sequelize.close();
   });
 
+  describe('POST /', () => {
+    let user, token, ingredient, diet, meal_ingredient, meal,
+        other_user, other_user_token;
+
+    const response = async (object, jwt, mealId) => {
+      return await request
+        .post(`/api/meals/${mealId}/meal-ingredients`)
+        .set('x-auth-token', jwt)
+        .send(object);
+    };
+
+    beforeEach(async () => {
+      user = await User.create({
+        username: 'bob',
+        email: 'bob@example.com',
+        password_digest: 123456,
+        admin: true,
+        calories: 2400
+      });
+      other_user = await User.create({
+        username: 'tom',
+        email: 'tom@example.com',
+        password_digest: 123456,
+        admin: false,
+        calories: 2000
+      });
+      token = createJWT(user);
+
+      ingredient = await Ingredient.create({
+        name: 'Medium Pear',
+        description: 'Fruit',
+        serving_size: 178.00,
+        calories: 101.00,
+        carbohydrates: 27.00,
+        fat: 65.00,
+        protein: 25.00
+      });
+
+      meal_ingredient_object = {
+        ingredientId: ingredient.id,
+        servings: 1
+      };
+
+      meal = await Meal.create({
+        userId: user.id,
+        name: 'Breakfast',
+        description: 'Breakfast foods',
+      });
+    });
+
+    it('should return 401 if client not logged in', async () => {
+      token = '';
+      const res = await response(meal_ingredient_object, token, meal.id);
+
+      expect(res.status).toBe(401);
+    });
+
+    it('should return 400 if meal_ingredient is invalid', async () => {
+      meal_ingredient_object = {};
+      const res = await response(meal_ingredient_object, token, meal.id);
+
+      expect(res.status).toBe(400);
+    });
+
+    it('should return 400 if invalid meal ID ', async () => {
+      const meal_id = 'id';
+      const res = await response(meal_ingredient_object, token, meal_id);
+
+      expect(res.status).toBe(400);
+    });
+
+    it('should return 400 if meal ID valid but meal ID not in DB', async () => {
+      const meal_id = '10000';
+      const res = await response(meal_ingredient_object, token, meal_id);
+
+      expect(res.status).toBe(400);
+    });
+
+    it('should save meal_ingredient if it valid', async () => {
+      const res = await response(meal_ingredient_object, token, meal.id);
+      const mi = await MealIngredient.findOne({ where: { servings: 1 } });
+
+      expect(mi).toHaveProperty('id');
+      expect(mi).toHaveProperty('mealId', meal.id);
+      expect(mi).toHaveProperty('ingredientId', meal_ingredient_object.ingredientId);
+      expect(mi).toHaveProperty('servings', meal_ingredient_object.servings);
+    });
+
+    it('should return meal_ingredient if meal_ingredient is valid', async () => {
+      const res = await response(meal_ingredient_object, token, meal.id);
+
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty('id');
+      expect(res.body).toHaveProperty('mealId', meal.id);
+      expect(res.body).toHaveProperty('ingredientId', meal_ingredient_object.ingredientId);
+      expect(res.body).toHaveProperty('servings', meal_ingredient_object.servings);
+    });
+  });
+
   describe('PUT /ID', () => {
-    let user, token, ingredient, diet, meal_ingredient, updated_meal_ingredient;
+    let user, token, ingredient, diet, meal_ingredient, updated_meal_ingredient,
+        other_user, other_user_token, meal;
 
     const response = async (object, jwt, mealId, id) => {
       return await request
@@ -34,6 +134,14 @@ describe('/:mealId/meal-ingredients', () => {
         calories: 2400
       });
       token = createJWT(user);
+      other_user = await User.create({
+        username: 'seth',
+        email: 'seth@example.com',
+        password_digest: '123456',
+        admin: false,
+        calories: 2000
+      });
+      other_user_token = createJWT(other_user);
 
       ingredient = await Ingredient.create({
         name: 'Medium Pear',
@@ -80,10 +188,8 @@ describe('/:mealId/meal-ingredients', () => {
       expect(res.status).toBe(401);
     });
 
-    it('should return 403 if user is not admin', async () => {
-      user = User.build({ admin: false });
-      token = createJWT(user);
-      const res = await response(updated_meal_ingredient, token, meal.id, meal_ingredient.id);
+    it('should return 403 if user_id is not current user id', async () => {
+      const res = await response(updated_meal_ingredient, other_user_token, meal.id, meal_ingredient.id);
 
       expect(res.status).toBe(403);
     });
@@ -143,7 +249,8 @@ describe('/:mealId/meal-ingredients', () => {
   });
 
   describe('DELETE /ID', () => {
-    let user, token, ingredient, meal, meal_ingredient;
+    let user, token, ingredient, meal, meal_ingredient, other_user,
+        other_user_token;
 
     const response = async (mealId, id, jwt) => {
       return await request
@@ -156,10 +263,18 @@ describe('/:mealId/meal-ingredients', () => {
         username: 'bob',
         email: 'bob@example.com',
         password_digest: '123456',
-        admin: true,
+        admin: false,
         calories: 2400
       });
       token = createJWT(user);
+      other_user = await User.create({
+        username: 'seth',
+        email: 'seth@example.com',
+        password_digest: '123456',
+        admin: false,
+        calories: 2000
+      });
+      other_user_token = createJWT(other_user);
 
       ingredient = await Ingredient.create({
         name: 'Medium Pear',
@@ -191,10 +306,8 @@ describe('/:mealId/meal-ingredients', () => {
       expect(res.status).toBe(401);
     });
 
-    it('should return 403 if user is not admin', async () => {
-      user = User.build({ admin: false });
-      token = createJWT(user);
-      const res = await response(meal.id, meal_ingredient.id, token);
+    it('should return 403 if user_id is not current user id', async () => {
+      const res = await response(meal.id, meal_ingredient.id, other_user_token);
 
       expect(res.status).toBe(403);
     });

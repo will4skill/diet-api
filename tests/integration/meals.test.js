@@ -335,7 +335,7 @@ describe('/api/meals', () => {
   });
 
   describe('PUT /ID', () => {
-    let user, other_user, token, meal, meal_object, ingredient;
+    let user, other_user, token, meal, meal_object, ingredient, other_user_token;
 
     const response = async (object, m_id, jwt) => {
       return await request
@@ -349,7 +349,7 @@ describe('/api/meals', () => {
         username: 'bob',
         email: 'bob@example.com',
         password_digest: 123456,
-        admin: true,
+        admin: false,
         calories: 2400
       });
       other_user = await User.create({
@@ -360,6 +360,7 @@ describe('/api/meals', () => {
         calories: 2000
       });
       token = createJWT(user);
+      other_user_token = createJWT(other_user);
 
       ingredient = await Ingredient.create({
         name: 'Medium Pear',
@@ -389,10 +390,8 @@ describe('/api/meals', () => {
       expect(res.status).toBe(401);
     });
 
-    it('should return 403 if user is not admin', async () => {
-      user = User.build({ admin: false });
-      token = createJWT(user);
-      const res = await response(meal_object, meal.id, token);
+    it('should return 403 if user_id is not current user id', async () => {
+      const res = await response(meal_object, meal.id, other_user_token);
 
       expect(res.status).toBe(403);
     });
@@ -440,7 +439,7 @@ describe('/api/meals', () => {
   });
 
   describe('DELETE /ID', () => {
-    let user, token, ingredient, meal;
+    let user, token, ingredient, meal, other_user, other_user_token;
 
     const response = async (m_id, jwt) => {
       return await request
@@ -453,10 +452,19 @@ describe('/api/meals', () => {
         username: 'bob',
         email: 'bob@example.com',
         password_digest: 123456,
-        admin: true,
+        admin: false,
         calories: 2400
       });
       token = createJWT(user);
+
+      other_user = await User.create({
+        username: 'tom',
+        email: 'tom@example.com',
+        password_digest: 123456,
+        admin: false,
+        calories: 2000
+      });
+      other_user_token = createJWT(other_user);
 
       ingredient = await Ingredient.create({
         name: 'Medium Pear',
@@ -487,10 +495,8 @@ describe('/api/meals', () => {
       expect(res.status).toBe(401);
     });
 
-    it('should return 403 if user is not admin', async () => {
-      user = User.build({ admin: false });
-      token = createJWT(user);
-      const res = await response(meal.id, token);
+    it('should return 403 if user_id is not current user id', async () => {
+      const res = await response(meal.id, other_user_token);
 
       expect(res.status).toBe(403);
     });

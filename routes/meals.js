@@ -60,10 +60,12 @@ router.get('/:id', auth, async (req, res) => {
   }
 });
 
-router.put('/:id', [auth, admin], async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
   let meal = await Meal.findOne({ where: { id: req.params.id } });
   if (!meal) {
     return res.status(404).send('Meal with submitted ID not found');
+  } else if (req.user.id !== meal.userId) {
+    res.status(403).send('Forbidden');
   }
 
   try {
@@ -77,10 +79,12 @@ router.put('/:id', [auth, admin], async (req, res) => {
   }
 });
 
-router.delete('/:id', [auth, admin], async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
   const meal = await Meal.findOne({ where: { id: req.params.id } });
   if (!meal) {
     res.status(404).send('Meal ID not found');
+  } else if (req.user.id !== meal.userId) {
+    res.status(403).send('Forbidden');
   } else {
     await meal.destroy(); // Auto-deletes meal_ingredients
     res.send(meal);
