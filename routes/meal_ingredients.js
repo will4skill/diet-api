@@ -6,6 +6,17 @@ const { findMeal} = require('../middleware/find');
 const { Meal, MealIngredient } = require('../sequelize');
 const prefix = '/:mealId/meal-ingredients';
 
+router.get(`${prefix}/:id`, [auth, findMeal], async (req, res) => {
+  if (req.user.id !== req.meal.userId) return res.status(403).send('Forbidden');
+
+  const meal_ingredient = await MealIngredient.findOne({ where: { id: req.params.id }});
+  if (!meal_ingredient) {
+    res.status(404).send('Meal ingredient with submitted ID not found');
+  } else {
+    res.send(meal_ingredient);
+  }
+});
+
 router.post(`${prefix}/`, [auth, findMeal], async (req, res) => {
   try {
     const meal_ingredient = await MealIngredient.create({
