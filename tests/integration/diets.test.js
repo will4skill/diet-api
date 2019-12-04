@@ -69,7 +69,7 @@ describe('/api/diets', () => {
     };
 
     beforeEach(async () => {
-      user = User.build({ admin: true });
+      user = User.build({ admin: false });
       token = createJWT(user);
       diet = await Diet.create({
         name: 'Keto',
@@ -85,14 +85,6 @@ describe('/api/diets', () => {
       const res = await response(diet.id, token);
 
       expect(res.status).toBe(401);
-    });
-
-    it('should return 403 if user is not admin', async () => {
-      user = User.build({ admin: false });
-      token = createJWT(user);
-      const res = await response(diet.id, token);
-
-      expect(res.status).toBe(403);
     });
 
     it('should return 404 if invalid diet ID', async () => {

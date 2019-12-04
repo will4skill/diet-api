@@ -9,7 +9,7 @@ router.get('/', async (req, res) => {
   res.send(diets);
 });
 
-router.get('/:id', [auth, admin], async (req, res) => {
+router.get('/:id', auth, async (req, res) => {
   const diet = await Diet.findOne({ where: { id: req.params.id }});
   if (!diet) {
     return res.status(404).send('Diet with submitted ID not found');
