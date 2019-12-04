@@ -1,4 +1,4 @@
-const { User, sequelize } = require('../../sequelize');
+const { User, Diet, sequelize } = require('../../sequelize');
 const server = require('../../index');
 const request = require('supertest')(server);
 const createJWT = require('../../utilities/tokenUtility');
@@ -6,6 +6,7 @@ const createJWT = require('../../utilities/tokenUtility');
 describe('/api/users', () => {
   afterEach(async () => {
     await User.destroy({ where: {} });
+    await Diet.destroy({ where: {} });
   });
 
   afterAll(async () => {
@@ -13,7 +14,7 @@ describe('/api/users', () => {
   });
 
   describe('GET /', () => {
-    let token, user;
+    let token, user, diet;
 
     const response = async (jwt) => {
       return await request
@@ -22,12 +23,19 @@ describe('/api/users', () => {
     };
 
     beforeEach(async () => {
+      diet = await Diet.create({
+        name: 'Keto',
+        description: 'Low-carb, high-fat',
+        carbohydrates: 10.00,
+        fat: 65.00,
+        protein: 25.00
+      });
       user = User.build({ admin: true });
       token = createJWT(user);
 
       await User.bulkCreate([
-        { username: 'bob' , email: 'bob@example.com', password_digest: 123456, calories: 2400 },
-        { username: 'tom' , email: 'tom@example.com', password_digest: 123456, calories: 2000 }
+        { username: 'bob' , email: 'bob@example.com', password_digest: 123456, calories: 2400, dietId: diet.id },
+        { username: 'tom' , email: 'tom@example.com', password_digest: 123456, calories: 2000, dietId: diet.id }
       ]);
     });
 
@@ -54,6 +62,7 @@ describe('/api/users', () => {
       expect(res.body.some(u => u.username === 'bob')).toBeTruthy();
       expect(res.body.some(u => u.email === 'bob@example.com')).toBeTruthy();
       expect(res.body.some(u => u.calories === 2400)).toBeTruthy();
+      expect(res.body.some(u => u.dietId === diet.id)).toBeTruthy();
       expect(res.body.some(u => u.username === 'tom')).toBeTruthy();
       expect(res.body.some(u => u.email === 'tom@example.com')).toBeTruthy();
       expect(res.body.some(u => u.calories === 2000)).toBeTruthy();
@@ -61,7 +70,7 @@ describe('/api/users', () => {
   });
 
   describe('POST /', () => {
-    let user_object;
+    let user_object, diet;
 
     const response = async (object) => {
       return await request
@@ -70,16 +79,38 @@ describe('/api/users', () => {
     };
 
     beforeEach(async () => {
+      diet = await Diet.create({
+        name: 'Keto',
+        description: 'Low-carb, high-fat',
+        carbohydrates: 10.00,
+        fat: 65.00,
+        protein: 25.00
+      });
       user_object = {
         username: 'bob',
         email: 'bob@example.com',
         password: '123456',
-        calories: 2400
+        calories: 2400,
+        dietId: diet.id
       };
     });
 
+    it('should return 400 if invalid diet ID ', async () => {
+      user_object.dietId = 'id';
+      const res = await response(user_object);
+
+      expect(res.status).toBe(400);
+    });
+
+    it('should return 400 if diet ID valid but diet ID not in DB', async () => {
+      user_object.dietId = '10000';
+      const res = await response(user_object);
+
+      expect(res.status).toBe(400);
+    });
+
     it('should return 400 if user is invalid', async () => {
-      user_object = { email: 'bob@example.com', password: '123' };
+      user_object = { email: 'bob@example.com', password: '123', dietId: diet.id };
       const res = await response(user_object);
 
       expect(res.status).toBe(400);
@@ -90,7 +121,8 @@ describe('/api/users', () => {
         username: 'bob',
         email: 'bob@example.com',
         password_digest: '123456',
-        calories: 2400
+        calories: 2400,
+        dietId: diet.id
       });
       const res = await response(user_object);
 
@@ -107,6 +139,7 @@ describe('/api/users', () => {
       expect(user).toHaveProperty('email', 'bob@example.com');
       expect(user).toHaveProperty('password_digest');
       expect(user).toHaveProperty('calories');
+      expect(user).toHaveProperty('dietId');
     });
 
     it('should return jwt if user is valid', async () => {
@@ -117,7 +150,7 @@ describe('/api/users', () => {
   });
 
   describe('GET /ME', () => {
-    let user, token;
+    let user, token, diet;
     const response = async (jwt) => {
       return await request
         .get('/api/users/me')
@@ -125,11 +158,19 @@ describe('/api/users', () => {
     };
 
     beforeEach(async () => {
+      diet = await Diet.create({
+        name: 'Keto',
+        description: 'Low-carb, high-fat',
+        carbohydrates: 10.00,
+        fat: 65.00,
+        protein: 25.00
+      });
       user = await User.create({
         username: 'bob',
         email: 'bob@example.com',
         password_digest: '123456',
-        calories: 2400
+        calories: 2400,
+        dietId: diet.id
       });
       token = createJWT(user);
     });
@@ -149,11 +190,12 @@ describe('/api/users', () => {
       expect(res.body).toHaveProperty('username', user.username);
       expect(res.body).toHaveProperty('email', user.email);
       expect(res.body).toHaveProperty('calories', user.calories);
+      expect(res.body).toHaveProperty('dietId', diet.id);
     });
   });
 
   describe('PUT /ME', () => {
-    let user, token, user_object;
+    let user, token, user_object, diet_1, diet_2;
 
     const response = async (object, jwt) => {
       return await request
@@ -163,14 +205,29 @@ describe('/api/users', () => {
     };
 
     beforeEach(async () => {
+      diet_1 = await Diet.create({
+        name: 'Keto',
+        description: 'Low-carb, high-fat',
+        carbohydrates: 10.00,
+        fat: 65.00,
+        protein: 25.00
+      });
+      diet_2 = await Diet.create({
+        name: 'Balanced',
+        description: 'Balanced macro distribution',
+        carbohydrates: 50.00,
+        fat: 20.00,
+        protein: 30.00
+      });
       user = await User.create({
         username: 'bob',
         email: 'bob@example.com',
         password_digest: '123456',
-        calories: 2400
+        calories: 2400,
+        dietId: diet_1.id
       });
       token = createJWT(user);
-      user_object = { username: 'binky', email: 'binky@badbunny.com', calories: 2000 }
+      user_object = { username: 'binky', email: 'binky@badbunny.com', calories: 2000, dietId: diet_2.id }
     });
 
     it('should return 401 if client not logged in', async () => {
@@ -178,6 +235,20 @@ describe('/api/users', () => {
       const res = await response(user_object, token);
 
       expect(res.status).toBe(401);
+    });
+
+    it('should return 400 if invalid diet ID ', async () => {
+      user_object.dietId = 'id';
+      const res = await response(user_object, token);
+
+      expect(res.status).toBe(400);
+    });
+
+    it('should return 400 if diet ID valid but diet ID not in DB', async () => {
+      user_object.dietId = '10000';
+      const res = await response(user_object, token);
+
+      expect(res.status).toBe(400);
     });
 
     // it('should return 400 if user is invalid', async () => {
@@ -194,6 +265,7 @@ describe('/api/users', () => {
       expect(result).toHaveProperty('username', 'binky');
       expect(result).toHaveProperty('email', 'binky@badbunny.com');
       expect(result).toHaveProperty('calories', 2000);
+      expect(result).toHaveProperty('dietId', diet_2.id);
     });
 
     it('should return updated user if it is valid', async () => {
@@ -203,11 +275,12 @@ describe('/api/users', () => {
       expect(res.body).toHaveProperty('username', 'binky');
       expect(res.body).toHaveProperty('email', 'binky@badbunny.com');
       expect(res.body).toHaveProperty('calories', 2000);
+      expect(res.body).toHaveProperty('dietId', diet_2.id);
     });
   });
 
   describe('DELETE /ID', () => {
-    let user, token;
+    let user, token, diet;
 
     const response = async (id, jwt) => {
       return await request
@@ -216,12 +289,20 @@ describe('/api/users', () => {
     };
 
     beforeEach(async () => {
+      diet = await Diet.create({
+        name: 'Keto',
+        description: 'Low-carb, high-fat',
+        carbohydrates: 10.00,
+        fat: 65.00,
+        protein: 25.00
+      });
       user = await User.create({
         username: 'bob',
         email: 'bob@example.com',
         admin: true,
         password_digest: '123456',
-        calories: 2400
+        calories: 2400,
+        dietId: diet.id
       });
       token = createJWT(user);
     });
@@ -272,6 +353,7 @@ describe('/api/users', () => {
       expect(res.body).toHaveProperty('username', user.username);
       expect(res.body).toHaveProperty('email', user.email);
       expect(res.body).toHaveProperty('calories', user.calories);
+      expect(res.body).toHaveProperty('dietId', diet.id);
     });
   });
 });

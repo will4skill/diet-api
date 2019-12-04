@@ -6,13 +6,14 @@ const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 const createJWT = require('../utilities/tokenUtility');
 const config = require('config');
+const { findDiet } = require('../middleware/find');
 
 router.get('/', [auth, admin], async (req, res) => {
   const users = await User.findAll();
   res.send(users);
 });
 
-router.post('/', async (req, res) => {
+router.post('/', [findDiet], async (req, res) => {
   const password = req.body.password;
   const salt_value = Number(config.get("bcrypt_salt"));
   const salt = await bcrypt.genSalt(salt_value);
@@ -24,7 +25,7 @@ router.post('/', async (req, res) => {
       email: req.body.email,
       password_digest: password_digest,
       calories: req.body.calories,
-      dietId: null,
+      dietId: req.diet.id,
     });
 
     res
@@ -36,7 +37,7 @@ router.post('/', async (req, res) => {
           username: req.body.username,
           email: req.body.email,
           calories: req.body.calories,
-          dietId: null,
+          dietId: req.diet.id,
         });
   } catch (err) {
     res.status(400).send(err);
@@ -54,7 +55,7 @@ router.get('/me', auth, async (req, res) => {
   res.send(user);
 });
 
-router.put('/me', auth, async (req, res) => {
+router.put('/me', [auth, findDiet], async (req, res) => {
   // To do:
   // 1. add ability to update password. Don't forget to update token if password is updated.
   // 2. add ability to update a single property
@@ -68,7 +69,7 @@ router.put('/me', auth, async (req, res) => {
         username: req.body.username,
         email: req.body.email,
         calories: req.body.calories,
-        dietId: null,
+        dietId: req.diet.id,
       });
       res.send(updated_user);
   } catch(err) {
