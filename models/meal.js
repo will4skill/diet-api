@@ -9,7 +9,6 @@ module.exports = function(sequelize, DataTypes) {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
       len: [3, 30]
     },
     description: {
