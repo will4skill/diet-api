@@ -23,7 +23,6 @@ describe('/api/diets', () => {
 
     beforeEach(async () => {
       const user = User.build({ admin: false });
-      token = createJWT(user);
       await Diet.bulkCreate([
         {
           name: 'Keto',
@@ -42,15 +41,8 @@ describe('/api/diets', () => {
       ]);
     });
 
-    it('should return 401 if client not logged in', async () => {
-      token = '';
-      const res = await response(token);
-
-      expect(res.status).toBe(401);
-    });
-
     it('should return all diets (stat code 200)', async () => {
-      const res = await response(token);
+      const res = await response();
 
       expect(res.status).toBe(200);
       expect(res.body.length).toBe(2);

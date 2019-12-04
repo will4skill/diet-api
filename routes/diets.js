@@ -4,7 +4,7 @@ const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 const { Diet } = require('../sequelize');
 
-router.get('/', auth, async (req, res) => {
+router.get('/', async (req, res) => {
   const diets = await Diet.findAll();
   res.send(diets);
 });
