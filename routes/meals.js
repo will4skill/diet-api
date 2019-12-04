@@ -24,13 +24,16 @@ router.post('/', auth, async (req, res) => {
       description: req.body.description,
     });
 
-    for(let mi of req.body.meal_ingredients) {
-      meal_ingredients.push({
-        mealId: meal.id,
-        ingredientId: mi.ingredientId,
-        servings: mi.servings
-      });
+    if (req.body.meal_ingredients) {
+      for(let mi of req.body.meal_ingredients) {
+        meal_ingredients.push({
+          mealId: meal.id,
+          ingredientId: mi.ingredientId,
+          servings: mi.servings
+        });
+      }
     }
+
     // Note: tried to use a transaction here. Didn't work
     await MealIngredient.bulkCreate(meal_ingredients);
     res.send(meal);
