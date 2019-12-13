@@ -58,6 +58,41 @@ Additional resources that helped me:
 </p>
 
 ## Routes and Resources
+### Diets Resource
+|URL|HTTP verb|Result|Include JWT?|Admin only?|
+|---|---|---|---|---|
+/api/diets|POST|create a new diet|Yes|Yes|
+/api/diets/:id|GET|return a specific diet|Yes|No|
+/api/diets|GET|return all diets|No|No|
+/api/diets/:id|PUT|update a specific diet|Yes|Yes|
+/api/diets/:id|DELETE|delete a specific diet|Yes|Yes|
+
+### Ingredients Resource
+|URL|HTTP verb|Result|Include JWT?|Admin only?|
+|---|---|---|---|---|
+/api/ingredients|POST|create a new ingredient|Yes|Yes|
+/api/ingredients/:id|GET|return a specific ingredient|Yes|Yes|
+/api/ingredients|GET|return all ingredients|No|No|
+/api/ingredients/:id|PUT|update a specific ingredient|Yes|Yes|
+/api/ingredients/:id|DELETE|delete a specific ingredient|Yes|Yes|
+
+### Meals Resource
+|URL|HTTP verb|Result|Include JWT?|Admin only?|
+|---|---|---|---|---|
+/api/meals|POST|create a new meal and associated meal_ingredients|Yes|No|
+/api/meals/:id|GET|return a specific meal and associated meal_ingredients for current user|Yes|No|
+/api/meals|GET|return all meals and associated meal_ingredients for current user|Yes|No|
+/api/meals/:id|PUT|update a specific meal for current user|Yes|No|
+/api/meals/:id|DELETE|delete a specific meal for current user|Yes|No|
+
+### MealIngredient Resource
+|URL|HTTP verb|Result|Include JWT?|Admin only?|
+|---|---|---|---|---|
+/api/meals/:meaId/meal-ingredients|POST|create a new meal_ingredient for current meal|Yes|No|
+/api/meals/:meaId/meal-ingredients/:id|GET|return a specific meal_ingredient for current user and meal|Yes|No|
+/api/meals/:meaId/meal-ingredients/:id|PUT|update a specific meal_ingredient for current user and current meal|Yes|No|
+/api/meals/:meaId/meal-ingredients/:id|DELETE|delete a specific meal_ingredient for current user and current meal|Yes|No|
+
 ### Users Resource
 |URL|HTTP verb|Result|Include JWT?|Admin only?|
 |---|---|---|---|---|
