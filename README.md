@@ -1,4 +1,4 @@
-# Store API
+# Diet API
 
 ## Project Description
 This is a simple API for a diet tracking application. I based the folder structure, authentication and authorization on what I learned in the following course: https://codewithmosh.com/p/the-complete-node-js-course
