@@ -46,6 +46,8 @@ Additional resources that helped me:
   * https://stackoverflow.com/questions/50171932/run-jest-test-suites-in-groups
 * Node Environment Variables:
   * https://stackoverflow.com/questions/9198310/how-to-set-node-env-to-production-development-in-os-x
+* Diet Nutrition Facts: USDA (through Google searches)
+  * https://www.usda.gov/
 
 ## App Structure
 <p align="center">
